@@ -243,6 +243,23 @@ void TsGeometryManager::ConstructSDandField() {
 					}
 				}
 			}
+
+			index = -1;
+			if ( fVm->BiasingProcessExists("regionalcrosssectionenhance", index) ) {
+                TsRegionalCrossSectionEnhanceOperator* biasingOperatorRCSE =
+				new TsRegionalCrossSectionEnhanceOperator(fPm, fPhm, "regionalcrosssectionenhance");
+                G4String pWorlName = biasingOperatorRCSE->GetParallelWorldName();
+                biasingOperatorRCSE->SetParallelWorld(CreateParallelWorld(pWorlName, false));
+
+                for ( iter=fStore->begin(); iter!=fStore->end(); iter++) {
+                    if ( biasingOperatorRCSE->IsApplicable(iter->second->GetEnvelopePhysicalVolume()->GetLogicalVolume()) ) {
+                        biasingOperatorRCSE->AttachTo(iter->second->GetEnvelopePhysicalVolume()->GetLogicalVolume());
+                        std::vector<G4VPhysicalVolume*> allVol = iter->second->GetAllPhysicalVolumes(true);
+                        for ( size_t t = 0; t < allVol.size(); t++ )
+                            biasingOperatorRCSE->AttachTo(allVol[t]->GetLogicalVolume());
+                    }
+                }
+            }
 		}
 	}
 #endif

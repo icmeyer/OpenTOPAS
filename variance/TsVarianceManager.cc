@@ -38,6 +38,7 @@
 #include "TsWeightWindow.hh"
 #include "TsUniformSplitting.hh"
 #include "TsCrossSectionEnhancement.hh"
+#include "TsRegionalCrossSectionEnhanceManager.hh"
 #include "TsForcedInteraction.hh"
 #include "TsKillOtherParticles.hh"
 #include "TsDirectionalRussianRoulette.hh"
@@ -135,6 +136,9 @@ void TsVarianceManager::Configure() {
 					fBiasingProcesses.push_back(new TsAutomaticImportanceSamplingManager(aBiasingProcessName, fPm, fGm));
 				} else if ( type == "automaticimportancesamplingparallel") {
 					fBiasingProcesses.push_back(new TsAutomaticImportanceSamplingParallelManager(aBiasingProcessName, fPm, fGm));
+				}
+				} else if ( type == "regionalcrosssectionenhance") {
+					fBiasingProcesses.push_back(new TsRegionalCrossSectionEnhanceManager(aBiasingProcessName, fPm, fGm, fPhm));
 				}
 				else {
 					G4cerr << "Error, biasing technique " << type << " not found" << G4endl;
