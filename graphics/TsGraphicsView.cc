@@ -45,8 +45,9 @@
 
 TsGraphicsView::TsGraphicsView(TsParameterManager* pM, TsGraphicsManager* grM, TsGeometryManager* gM, G4String viewerName)
 :fPm(pM), fGrm(grM), fGm(gM), fViewerName(viewerName), fRefreshEvery("run"), fColorModel("charge"),
-fIncludeGeometry(true), fIncludeTrajectories(true), fUseSmoothTrajectories(true), fIncludeStepPoints(false), fIncludeAxes(false),
-fIsActive(true), fAlreadyCreated(false), fMagneticFieldArrowDensity(0), fHadParameterChangeSinceLastRun(false)
+fIncludeGeometry(true), fUseMeshRendering(false), fIncludeTrajectories(true), fUseSmoothTrajectories(true),
+fIncludeStepPoints(false), fIncludeAxes(false), fIsActive(true), fAlreadyCreated(false), fMagneticFieldArrowDensity(0),
+fHadParameterChangeSinceLastRun(false)
 {
 	fVerbosity = fPm->GetIntegerParameter("Ts/SequenceVerbosity");
 
@@ -72,6 +73,10 @@ void TsGraphicsView::CreateView() {
 	if (fPm->ParameterExists(GetFullParmName("IncludeGeometry")) &&
 		!fPm->GetBooleanParameter(GetFullParmName("IncludeGeometry")))
 		fIncludeGeometry = false;
+
+	if (fPm->ParameterExists(GetFullParmName("UseMeshRendering")) &&
+		fPm->GetBooleanParameter(GetFullParmName("UseMeshRendering")))
+		fUseMeshRendering = true;
 
 	if (fPm->ParameterExists(GetFullParmName("IncludeTrajectories")) &&
 		!fPm->GetBooleanParameter(GetFullParmName("IncludeTrajectories")))
@@ -199,9 +204,9 @@ void TsGraphicsView::CreateView() {
 	else if (fViewerType=="dawn") fViewerType = "DAWNFILE";
 	else if (fViewerType=="gmocren") fViewerType = "gMocrenFile";
 	else {
-	    G4cerr << "Topas is exiting due to error in graphics setup." << G4endl;
-	    G4cerr << "Parameter " << GetFullParmName("Type") << " specifies unknown viewer type: " << fPm->GetStringParameter(GetFullParmName("Type")) << G4endl;
-	    fPm->AbortSession(1);
+		G4cerr << "Topas is exiting due to error in graphics setup." << G4endl;
+		G4cerr << "Parameter " << GetFullParmName("Type") << " specifies unknown viewer type: " << fPm->GetStringParameter(GetFullParmName("Type")) << G4endl;
+		fPm->AbortSession(1);
 	}
 
 	// Create the sceneHandler
@@ -297,10 +302,10 @@ void TsGraphicsView::CreateView() {
 
 	// Set trajectory model
 	if (fIncludeTrajectories || fIncludeStepPoints) {
-	    if (fUseSmoothTrajectories)
-	        G4UImanager::GetUIpointer()->ApplyCommand("/vis/scene/add/trajectories smooth rich");
-	    else
-	        G4UImanager::GetUIpointer()->ApplyCommand("/vis/scene/add/trajectories rich");
+		if (fUseSmoothTrajectories)
+			G4UImanager::GetUIpointer()->ApplyCommand("/vis/scene/add/trajectories smooth rich");
+		else
+			G4UImanager::GetUIpointer()->ApplyCommand("/vis/scene/add/trajectories rich");
 
 		// Handle trajecory coloring options
 		if ((fIncludeTrajectories || fIncludeStepPoints) && fPm->ParameterExists(GetFullParmName("ColorBy"))) {
@@ -851,6 +856,11 @@ void TsGraphicsView::CreateView() {
 			G4UImanager::GetUIpointer()->ApplyCommand("/vis/modeling/trajectories/" + fViewerName + "_" + fColorModel + "/default/setDrawStepPts true " );
 			G4UImanager::GetUIpointer()->ApplyCommand("/vis/modeling/trajectories/" + fViewerName + "_" + fColorModel + "/default/setDrawAuxPts true " );
 		}
+	}
+
+	if (fUseMeshRendering) {
+		G4UImanager::GetUIpointer()->ApplyCommand("/vis/viewer/set/specialMeshRendering");
+		G4UImanager::GetUIpointer()->ApplyCommand("/vis/viewer/set/specialMeshRenderingOption surfaces");
 	}
 
 	SetView();

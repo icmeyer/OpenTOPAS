@@ -73,6 +73,7 @@ private:
 	G4String fRefreshEvery;
 	G4String fColorModel;
 	G4bool fIncludeGeometry;
+	G4bool fUseMeshRendering;
 	G4bool fIncludeTrajectories;
 	G4bool fUseSmoothTrajectories;
 	G4bool fIncludeStepPoints;
